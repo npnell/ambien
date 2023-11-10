@@ -1,0 +1,10 @@
+# Extension-less files
+*
+!/**/
+!*.*
+
+# VSCode Config
+.vscode/
+
+# Image files
+*.jpg
