@@ -5,19 +5,22 @@
 #include <iostream>
 #include <fstream>
 
-const int image_width { 256 };
-const int image_height { 256 };
+const int image_height { 800 };
+const int image_width { 800 };
+
+const int channels { 3 };
 
 const char *out = "render.jpg";
 
 int main(int argc, char* argv[])
 {
 
-    uint8_t data[3 * image_width][image_height];
+    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t) * image_height * image_width * channels);
 
-    for(int i = 0; i < image_width; ++i) {
-        std::clog << "\rScanlines remaining: " << image_height - i << std::flush;
-        for(int j = 0; j < image_height; ++j) {
+    for(int j = 0; j < image_height; ++j) {
+        std::clog << "\rScanlines remaining: " << image_height - j << std::flush;
+        
+        for(int i = 0; i < image_width; ++i) {
             auto r = double(i) / (image_width - 1);
             auto g = double(j) / (image_height - 1);
             auto b = 0;
@@ -27,9 +30,9 @@ int main(int argc, char* argv[])
             auto ib = static_cast<uint8_t>(b * 255.99);
             
             // fstrm << ir << ' ' << ig << ' ' << ib << "\n";
-            data[i][j] = ir;
-            data[i + 1][j] = ig;
-            data[i + 2][j] = ib;
+            data[j * image_width * channels + i * channels] = ir;
+            data[j * image_width * channels + i * channels + 1] = ig;
+            data[j * image_width * channels + i * channels + 2] = ib;
         };
     }
     std::clog << "\rDone.                        \n";
