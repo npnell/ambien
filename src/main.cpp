@@ -18,7 +18,7 @@ const char *out = "render.jpg";
 color ray_color(const ray& r)
 {
     auto a = 0.5 * (unit_vector(r.direction()).y() + 1);
-    return a * color(1.0, 1.0, 1.0) + (1 - a) * color(0.5, 0.7, 1.0);
+    return (1 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
 
 int main(int argc, char* argv[])
@@ -50,12 +50,6 @@ int main(int argc, char* argv[])
     for(int j = 0; j < image_height; ++j) {
         std::clog << "\rScanlines remaining: " << image_height - j << std::flush;
         for(int i = 0; i < image_width; ++i) {
-            /*
-            auto r = double(i) / (image_width - 1);
-            auto g = double(j) / (image_height - 1);
-            auto b = 0;
-            */
-
             auto pixel = pixelloc_00 + pixel_delta_u * i + pixel_delta_v * j;
             ray r(pixel - camera_center, camera_center);
 
