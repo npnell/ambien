@@ -4,10 +4,14 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
+#include "sphere.h"
+#include "hittable_list.h"
+#include "util.h"
 
 const int image_width { 400 };
 
@@ -15,14 +19,25 @@ const int channels { 3 };
 
 const char *out = "render.jpg";
 
-color ray_color(const ray& r)
+color ray_color(const ray& r, const hittable_list& world)
 {
+    hit_record rec;
+
+    if(world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (color(rec.N) + color(1, 1, 1));
+    }
+
     auto a = 0.5 * (unit_vector(r.direction()).y() + 1);
     return (1 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
 
 int main(int argc, char* argv[])
 {
+    //world
+    hittable_list world;
+    world.add(std::make_shared<sphere>(point3(0, 0, -2.0), 1));
+    world.add(std::make_shared<sphere>(point3(0, -101, -2.0), 100));
+
     // image
     const auto aspect_ratio = 16.0 / 9.0;
 
@@ -53,7 +68,7 @@ int main(int argc, char* argv[])
             auto pixel = pixelloc_00 + pixel_delta_u * i + pixel_delta_v * j;
             ray r(pixel - camera_center, camera_center);
 
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color(r, world);
             write_color(data, pixel_color, image_width, channels, i, j);
         };
     }
