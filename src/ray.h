@@ -4,9 +4,6 @@
 #include "vec3.h"
 
 class ray {
-private:
-    vec3 dir;
-    point3 orig;
 public:
     ray(const vec3& dir, const point3& orig) : dir(dir), orig(orig) {}
 
@@ -17,6 +14,9 @@ public:
     point3 at(double t) const {
         return orig + t * dir;
     }
+private:
+    vec3 dir;
+    point3 orig;
 };
 
 #endif

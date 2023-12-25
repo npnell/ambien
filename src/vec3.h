@@ -5,8 +5,6 @@
 #include <cmath>
 
 class vec3 {
-private:
-    double e[3];
 public:
     vec3() : e{0,0,0} {}
     vec3(double x, double y, double z) : e{x, y, z} {}
@@ -40,6 +38,8 @@ public:
     double len() const {
         return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
     }
+private:
+    double e[3];
 };
 
 using point3 = vec3;
