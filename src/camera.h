@@ -24,11 +24,16 @@ public:
         for(int j = 0; j < image_height; ++j) {
             std::clog << "\rScanlines remaining: " << image_height - j << std::flush;
             for(int i = 0; i < image_width; ++i) {
-                auto pixel = pixelloc_00 + pixel_delta_u * i + pixel_delta_v * j;
-                ray r(pixel - camera_center, camera_center);
+                
 
-                color pixel_color = ray_color(r, world);
-                write_color(data, pixel_color, image_width, channels, i, j);
+                color pixel_color = color(0,0,0);
+
+                for(int s = 0; s < samples; ++s) {
+                    ray r = get_ray(i, j);
+                    pixel_color += ray_color(r, world);
+                }
+
+                write_color(data, pixel_color, image_width, channels, i, j, samples);
             };
         }
         std::clog << "\rDone.                        \n";
@@ -39,6 +44,7 @@ private:
     const double aspect_ratio = 16.0 / 9.0;
     const int image_width = 400;
     int image_height;
+    int samples = 100;
 
     const int channels = 3;
     const char *out = "render.jpg";
@@ -64,7 +70,7 @@ private:
 
         focal_length = 1.0;
         viewport_height = 2.0;
-        viewport_width = viewport_height * static_cast<double>(aspect_ratio);
+        viewport_width = viewport_height * aspect_ratio;
         camera_center = point3(0, 0, 0);
 
         // viewport axis vectors
@@ -87,8 +93,24 @@ private:
             return 0.5 * (color(rec.N) + color(1, 1, 1));
         }
 
-        auto a = 0.5 * (unit_vector(r.direction()).y() + 1);
+        auto a = 0.5 * (unit_vector(r.direction()).y() + 1.0);
         return (1 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
+    }
+
+    ray get_ray(int i, int j) const {
+        auto pixel_center = pixelloc_00 + pixel_delta_u * i + pixel_delta_v * j;
+        auto pixel_sample = pixel_center + pixel_sample_square();
+
+        auto ray_origin = camera_center;
+        auto ray_direction = pixel_sample - ray_origin ;
+        return ray(ray_direction, ray_origin);
+    }
+
+    vec3 pixel_sample_square() const {
+        auto px = -0.5 + random_double();
+        auto py = -0.5 + random_double();
+
+        return (px * pixel_delta_u) + (py * pixel_delta_v);
     }
 };
 

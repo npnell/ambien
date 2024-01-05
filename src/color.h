@@ -2,18 +2,25 @@
 #define COLOR_H
 
 #include "vec3.h"
+#include "interval.h"
 
 using color = vec3;
 
-void write_color(uint8_t *data, const color& pixel_color, int image_width, int channels, int i, int j)
+void write_color(uint8_t *data, const color& pixel_color, int image_width, int channels, int i, int j, int samples)
 {
-    auto ir = static_cast<uint8_t>(pixel_color[0] * 255.99);
-    auto ig = static_cast<uint8_t>(pixel_color[1] * 255.99);
-    auto ib = static_cast<uint8_t>(pixel_color[2] * 255.99);
-    
-    data[j * image_width * channels + i * channels] = ir;
-    data[j * image_width * channels + i * channels + 1] = ig;
-    data[j * image_width * channels + i * channels + 2] = ib;
+    auto r = pixel_color.x();
+    auto g = pixel_color.y();
+    auto b = pixel_color.z();
+
+    auto scale = 1.0 / samples;
+    r *= scale;
+    g *= scale;
+    b *= scale;
+
+    static const interval intensity(0.000, 0.999);
+    data[j * image_width * channels + i * channels] = static_cast<uint8_t>(256 * intensity.clamp(r));
+    data[j * image_width * channels + i * channels + 1] = static_cast<uint8_t>(256 * intensity.clamp(g));
+    data[j * image_width * channels + i * channels + 2] = static_cast<uint8_t>(256 * intensity.clamp(b));
 }
 
 #endif
