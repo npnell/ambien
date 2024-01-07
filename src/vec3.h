@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "util.h"
+
 class vec3 {
 public:
     vec3() : e{0,0,0} {}
@@ -37,6 +39,11 @@ public:
 
     double len() const {
         return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
+    }
+
+    bool near_zero() const {
+        auto s = 1e-8;
+        return (fabs(e[0]) < s) && (fabs(e[1]) < s) && (fabs(e[2]) < s);
     }
 private:
     double e[3];
@@ -84,6 +91,36 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(const vec3& u) {
     return u / u.len();
+}
+
+inline vec3 random_vector() {
+    return vec3(random_double(), random_double(), random_double());
+}
+
+inline vec3 random_vector(double min, double max) {
+    return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+}
+
+vec3 random_in_unit_sphere() {
+    while(true) {
+        vec3 _r = random_vector();
+        if(_r.len() < 1)
+            return _r;
+    }
+}
+
+inline vec3 random_unit_vector() {
+    auto _r = random_in_unit_sphere();
+    return _r / _r.len();
+}
+
+inline vec3 random_on_hemisphere(const vec3& normal) {
+    auto _r = random_unit_vector();
+    return dot(_r, normal) > 0.0 ? _r : -_r;
+}
+
+vec3 reflect(const vec3& v, const vec3& n) {
+    return v - 2 * dot(v,n) * n;
 }
 
 #endif

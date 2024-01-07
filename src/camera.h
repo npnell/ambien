@@ -10,8 +10,10 @@
 #include "vec3.h"
 #include "ray.h"
 #include "color.h"
+#include "hittable.h"
 #include "hittable_list.h"
 #include "util.h"
+#include "material.h"
 
 class camera {
 public:
@@ -22,7 +24,7 @@ public:
         uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t) * image_height * image_width * channels);
 
         for(int j = 0; j < image_height; ++j) {
-            std::clog << "\rScanlines remaining: " << image_height - j << std::flush;
+            std::clog << "\rScanlines remaining: " << image_height - j << ' ' << std::flush;
             for(int i = 0; i < image_width; ++i) {
                 
 
@@ -30,7 +32,7 @@ public:
 
                 for(int s = 0; s < samples; ++s) {
                     ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, world);
+                    pixel_color += ray_color(r, max_depth, world);
                 }
 
                 write_color(data, pixel_color, image_width, channels, i, j, samples);
@@ -38,6 +40,8 @@ public:
         }
         std::clog << "\rDone.                        \n";
         stbi_write_jpg(out, image_width, image_height, 3, data, 100);
+
+        free(data);
     }
 private:
     // image
@@ -45,6 +49,7 @@ private:
     const int image_width = 400;
     int image_height;
     int samples = 100;
+    int max_depth = 50;
 
     const int channels = 3;
     const char *out = "render.jpg";
@@ -86,11 +91,20 @@ private:
         pixelloc_00 = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
-    color ray_color(const ray& r, const hittable_list& world) {
+    color ray_color(const ray& r, int depth, const hittable_list& world) {
         hit_record rec;
 
-        if(world.hit(r, 0, infinity, rec)) {
-            return 0.5 * (color(rec.N) + color(1, 1, 1));
+        if(depth <= 0.0) {
+            return color(0,0,0);
+        }
+
+        if(world.hit(r, 0.001, infinity, rec)) {
+            ray scattered;
+            color attenuation;
+
+            if(rec.mat->scatter(r, rec, attenuation, scattered))
+                return attenuation * ray_color(scattered, depth - 1, world);
+            return color(0,0,0);
         }
 
         auto a = 0.5 * (unit_vector(r.direction()).y() + 1.0);

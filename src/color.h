@@ -6,6 +6,10 @@
 
 using color = vec3;
 
+inline double linear_to_gamma(double c) {
+    return sqrt(c);
+}
+
 void write_color(uint8_t *data, const color& pixel_color, int image_width, int channels, int i, int j, int samples)
 {
     auto r = pixel_color.x();
@@ -16,6 +20,10 @@ void write_color(uint8_t *data, const color& pixel_color, int image_width, int c
     r *= scale;
     g *= scale;
     b *= scale;
+
+    r = linear_to_gamma(r);
+    g = linear_to_gamma(g);
+    b = linear_to_gamma(b);
 
     static const interval intensity(0.000, 0.999);
     data[j * image_width * channels + i * channels] = static_cast<uint8_t>(256 * intensity.clamp(r));
