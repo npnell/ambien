@@ -11,13 +11,12 @@ public:
     point3 p;
     double t;
     std::shared_ptr<material> mat;
+    bool front_face;
 
     void set_normal_face(const ray& r, const vec3& outward_normal) {
         front_face = dot(outward_normal, r.direction()) < 0;
         N = front_face ? outward_normal : -outward_normal;
     }
-private:
-    bool front_face;
 };
 
 class hittable {

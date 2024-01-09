@@ -11,9 +11,9 @@ int main(int argc, char* argv[])
 {
     // World
     auto material_ground = std::make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto material_center = std::make_shared<lambertian>(color(0.7, 0.3, 0.3));
-    auto material_left   = std::make_shared<metal>(color(0.8, 0.8, 0.8), 0.01);
-    auto material_right  = std::make_shared<metal>(color(0.8, 0.6, 0.2), 0.5);
+    auto material_center = std::make_shared<lambertian>(color(0.1, 0.2, 0.5));
+    auto material_left   = std::make_shared<glass>(1.5);
+    auto material_right  = std::make_shared<metal>(color(0.8, 0.6, 0.2), 0.1);
 
     hittable_list world;
 
@@ -25,5 +25,5 @@ int main(int argc, char* argv[])
 
     // Camera
     camera cam;
-    cam.render(world);   
+    cam.render(world);
 }

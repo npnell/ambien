@@ -123,4 +123,11 @@ vec3 reflect(const vec3& v, const vec3& n) {
     return v - 2 * dot(v,n) * n;
 }
 
+vec3 refract(const vec3& R, const vec3& n, double coeff) {
+    auto cos_theta = fmin(dot(-R,n), 1.0);
+    auto R_perp = coeff * (R + cos_theta * n);
+    auto R_paral = -sqrt(fabs(1.0 - dot(R_perp, R_perp))) * n;
+    return R_perp + R_paral;
+}
+
 #endif
