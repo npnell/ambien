@@ -17,6 +17,17 @@
 
 class camera {
 public:
+    double aspect_ratio = 16.0 / 9.0;
+    int image_width = 400;
+    int samples = 100;
+    int max_depth = 50;
+
+    double vfov = 20.0;
+
+    point3 look_from = point3(0, 0, -1);
+    point3 look_at   = point3(0, 0, 0);
+    vec3   vup       = vec3(0, 1, 0);
+
     // render
     void render(const hittable_list& world) {
         initialize();
@@ -45,49 +56,48 @@ public:
     }
 private:
     // image
-    const double aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
     int image_height;
-    int samples = 100;
-    int max_depth = 50;
 
     const int channels = 3;
     const char *out = "render.jpg";
 
     // camera
-    double focal_length;
-    double viewport_height;
-    double viewport_width;
     point3 camera_center;
-
-    vec3 viewport_u;
-    vec3 viewport_v;
 
     vec3 pixel_delta_u;
     vec3 pixel_delta_v;
 
-    point3 viewport_upper_left;
     point3 pixelloc_00;
+    
+    vec3 u, v, w;
 
     void initialize() {
         image_height = static_cast<int>(image_width / aspect_ratio);
         image_height = image_height > 1 ? image_height : 1;
 
-        focal_length = 1.0;
-        viewport_height = 2.0;
-        viewport_width = viewport_height * aspect_ratio;
-        camera_center = point3(0, 0, 0);
+        auto theta = degree_to_rad(vfov);
+        auto h = tan(theta / 2.0);
+
+        double focal_length = (look_at - look_from).len();
+        double viewport_height = 2 * h * focal_length;
+        double viewport_width = viewport_height * (static_cast<double>(image_width) / image_height);
+        camera_center = look_from;
+
+        // basis vectors
+        w = unit_vector(look_from - look_at);
+        u = unit_vector(cross(vup, w));
+        v = cross(w, u);
 
         // viewport axis vectors
-        viewport_u = vec3(viewport_width, 0, 0);
-        viewport_v = vec3(0, -viewport_height, 0);
+        vec3 viewport_u = viewport_width * u;
+        vec3 viewport_v = viewport_height * -v;
 
         // pixel delta vectors
         pixel_delta_u = viewport_u / image_width;
         pixel_delta_v = viewport_v / image_height;
 
         // upper-left pixel location
-        viewport_upper_left = camera_center - point3(0, 0, focal_length) - viewport_u / 2 - viewport_v / 2;
+        point3 viewport_upper_left = camera_center - (focal_length * w) - viewport_u / 2 - viewport_v / 2;
         pixelloc_00 = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
