@@ -28,6 +28,9 @@ public:
     point3 look_at   = point3(0, 0, 0);
     vec3   vup       = vec3(0, 1, 0);
 
+    double defocus_angle = 10.0;
+    double focus_dist = 3.4;
+
     // render
     void render(const hittable_list& world) {
         initialize();
@@ -71,6 +74,9 @@ private:
     
     vec3 u, v, w;
 
+    vec3 defocus_disk_u;
+    vec3 defocus_disk_v;
+
     void initialize() {
         image_height = static_cast<int>(image_width / aspect_ratio);
         image_height = image_height > 1 ? image_height : 1;
@@ -78,8 +84,7 @@ private:
         auto theta = degree_to_rad(vfov);
         auto h = tan(theta / 2.0);
 
-        double focal_length = (look_at - look_from).len();
-        double viewport_height = 2 * h * focal_length;
+        double viewport_height = 2 * h * focus_dist;
         double viewport_width = viewport_height * (static_cast<double>(image_width) / image_height);
         camera_center = look_from;
 
@@ -97,11 +102,15 @@ private:
         pixel_delta_v = viewport_v / image_height;
 
         // upper-left pixel location
-        point3 viewport_upper_left = camera_center - (focal_length * w) - viewport_u / 2 - viewport_v / 2;
+        point3 viewport_upper_left = camera_center - (focus_dist * w) - viewport_u / 2 - viewport_v / 2;
         pixelloc_00 = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+        auto defocus_radius = focus_dist * tan(degree_to_rad(defocus_angle / 2));
+        defocus_disk_u = u * defocus_radius;
+        defocus_disk_v = v * defocus_radius;
     }
 
-    color ray_color(const ray& r, int depth, const hittable_list& world) {
+    color ray_color(const ray& r, int depth, const hittable_list& world) const {
         hit_record rec;
 
         if(depth <= 0.0) {
@@ -125,7 +134,7 @@ private:
         auto pixel_center = pixelloc_00 + pixel_delta_u * i + pixel_delta_v * j;
         auto pixel_sample = pixel_center + pixel_sample_square();
 
-        auto ray_origin = camera_center;
+        auto ray_origin = defocus_angle <= 0 ? camera_center : defocus_disk_sample();
         auto ray_direction = pixel_sample - ray_origin ;
         return ray(ray_direction, ray_origin);
     }
@@ -135,6 +144,11 @@ private:
         auto py = -0.5 + random_double();
 
         return (px * pixel_delta_u) + (py * pixel_delta_v);
+    }
+
+    point3 defocus_disk_sample() const {
+        auto p = random_in_unit_disk();
+        return camera_center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
     }
 };
 

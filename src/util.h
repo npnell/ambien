@@ -17,7 +17,7 @@ inline double random_double() {
 }
 
 inline double random_double(double min, double max) {
-    return min + (max - min) * rand();
+    return min + (max - min) * random_double();
 }
 
 #endif

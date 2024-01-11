@@ -130,4 +130,12 @@ vec3 refract(const vec3& R, const vec3& n, double coeff) {
     return R_perp + R_paral;
 }
 
+vec3 random_in_unit_disk() {
+    while(true) {
+        auto _r = vec3(random_double(-1,1), random_double(-1,1), 0);
+        if(dot(_r,_r) < 1)
+            return _r;
+    }
+}
+
 #endif
