@@ -6,7 +6,11 @@
 
 class sphere : public hittable {
 public:
-    sphere(const point3& _center, double _radius, std::shared_ptr<material> _mat) : center(_center), radius(_radius), mat(_mat) {}
+    sphere(const point3& _center, double _radius, std::shared_ptr<material> _mat)
+        : center(_center), radius(_radius), mat(_mat) {
+            auto rvec = vec3(radius, radius, radius);
+            bbox = aabb(center + rvec, center - rvec);
+    }
     bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const override {
         auto a = dot(r.direction(), r.direction());
         auto half_b = dot(r.direction(), r.origin() - center);
@@ -36,10 +40,12 @@ public:
 
         return true;
     }
+    aabb bounding_box() const override { return bbox; }
 private:
     point3 center;
     double radius;
     std::shared_ptr<material> mat;
+    aabb bbox;
 };
 
 #endif

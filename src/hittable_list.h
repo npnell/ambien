@@ -15,6 +15,7 @@ public:
 
     void add(std::shared_ptr<hittable> object) {
         object_list.push_back(object);
+        bbox = aabb(bbox, object->bounding_box());
     }
 
     void clear() { object_list.clear(); }
@@ -34,6 +35,10 @@ public:
 
         return hit_anything;
     }
+
+    aabb bounding_box() const override { return bbox; }
+private:
+    aabb bbox;
 };
 
 #endif
