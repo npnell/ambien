@@ -4,6 +4,7 @@
 #include "ray.h"
 #include "color.h"
 #include "vec3.h"
+#include "texture.h"
 
 class hit_record;
 
@@ -15,25 +16,26 @@ public:
 
 class lambertian : public material {
 public:
-    lambertian(const color& a) : albedo(a) {}
+    lambertian(const color& _albedo) : albedo(std::make_shared<solid>(_albedo)) {}
+    lambertian(std::shared_ptr<texture> _albedo) : albedo(_albedo) {}
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& r_scatter) const override {
         auto scatter_dir = rec.N + random_unit_vector();
         
-        if(scatter_dir.near_zero()) {
+        if(scatter_dir.near_zero())
             scatter_dir = rec.N;
-        }
+        
         r_scatter = ray(scatter_dir, rec.p);
-        attenuation = albedo;
+        attenuation = albedo->value(rec.u, rec.v, rec.p);
         return true;
     }
 private:
-    color albedo;
+    std::shared_ptr<texture> albedo;
 };
 
 class metal : public material {
 public:
-    metal(const color& a, double f) : albedo(a), fuzz(f) {}
+    metal(const color& _albedo, double _fuzz) : albedo(_albedo), fuzz(_fuzz < 1 ? _fuzz : 1) {}
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& r_scatter) const override {
         auto reflected_dir = reflect(unit_vector(r_in.direction()), rec.N);
@@ -56,7 +58,7 @@ public:
         auto rr = rec.front_face ? 1.0 / ir : ir;
         
         vec3 dir;
-        if(rr * sin_theta > 1.0) {
+        if(rr * sin_theta > 1.0 || reflectance(cos_theta, rr) > random_double()) {
             dir = reflect(unit_vector(r_in.direction()), rec.N);
         } else {
             dir = refract(unit_vector(r_in.direction()), rec.N, rr);

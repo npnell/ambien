@@ -24,11 +24,11 @@ public:
 
     double vfov = 20.0;
 
-    point3 look_from = point3(0, 0, -1);
+    point3 look_from = point3(0, 0, 12);
     point3 look_at   = point3(0, 0, 0);
     vec3   vup       = vec3(0, 1, 0);
 
-    double defocus_angle = 10.0;
+    double defocus_angle = 0.0;
     double focus_dist = 3.4;
 
     // render
@@ -126,8 +126,7 @@ private:
             return color(0,0,0);
         }
 
-        auto a = 0.5 * (unit_vector(r.direction()).y() + 1.0);
-        return (1 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
+        return color(0.70, 0.80, 1.00);
     }
 
     ray get_ray(int i, int j) const {
