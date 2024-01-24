@@ -39,7 +39,7 @@ public:
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& r_scatter) const override {
         auto reflected_dir = reflect(unit_vector(r_in.direction()), rec.N);
-        r_scatter = ray(reflected_dir + fuzz * random_unit_vector(), rec.p);
+        r_scatter = ray(reflected_dir + fuzz * random_in_unit_sphere(), rec.p);
         attenuation = albedo;
         return (dot(r_scatter.direction(), rec.N) > 0);
     }
@@ -53,18 +53,21 @@ public:
     glass(double _ir) : ir(_ir) {}
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& r_scatter) const override {
-        auto cos_theta = fmin(dot(-unit_vector(r_in.direction()),rec.N), 1.0);
+        attenuation = color(1.0, 1.0, 1.0);
+        
+        auto unit_dir = unit_vector(r_in.direction());
+        auto cos_theta = fmin(dot(-unit_dir, rec.N), 1.0);
         auto sin_theta = sqrt(1.0 - cos_theta * cos_theta);
         auto rr = rec.front_face ? 1.0 / ir : ir;
         
         vec3 dir;
         if(rr * sin_theta > 1.0 || reflectance(cos_theta, rr) > random_double()) {
-            dir = reflect(unit_vector(r_in.direction()), rec.N);
+            dir = reflect(unit_dir, rec.N);
         } else {
-            dir = refract(unit_vector(r_in.direction()), rec.N, rr);
+            dir = refract(unit_dir, rec.N, rr);
         }
+
         r_scatter = ray(dir, rec.p);
-        attenuation = color(1.0, 1.0, 1.0);
         return true;
     }
 private:

@@ -17,19 +17,19 @@
 
 class camera {
 public:
-    double aspect_ratio = 16.0 / 9.0;
+    double aspect_ratio = 1.0;
     int image_width = 400;
-    int samples = 100;
+    int samples = 10;
     int max_depth = 50;
 
-    double vfov = 20.0;
+    double vfov = 80.0;
 
-    point3 look_from = point3(0, 0, 12);
+    point3 look_from = point3(0, 0, 9);
     point3 look_at   = point3(0, 0, 0);
     vec3   vup       = vec3(0, 1, 0);
 
     double defocus_angle = 0.0;
-    double focus_dist = 3.4;
+    double focus_dist = 10;
 
     // render
     void render(const hittable_list& world) {
@@ -40,8 +40,6 @@ public:
         for(int j = 0; j < image_height; ++j) {
             std::clog << "\rScanlines remaining: " << image_height - j << ' ' << std::flush;
             for(int i = 0; i < image_width; ++i) {
-                
-
                 color pixel_color = color(0,0,0);
 
                 for(int s = 0; s < samples; ++s) {
@@ -83,9 +81,9 @@ private:
 
         auto theta = degree_to_rad(vfov);
         auto h = tan(theta / 2.0);
-
         double viewport_height = 2 * h * focus_dist;
         double viewport_width = viewport_height * (static_cast<double>(image_width) / image_height);
+        
         camera_center = look_from;
 
         // basis vectors

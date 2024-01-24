@@ -25,11 +25,11 @@ public:
         return x;
     }
 
-    inline double size() {
+    double size() {
         return max - min;
     }
 
-    inline interval expand(double delta) {
+    interval expand(double delta) {
         auto padding = delta / 2;
         return interval(min - padding, max + padding);
     }

@@ -101,17 +101,24 @@ inline vec3 random_vector(double min, double max) {
     return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
 }
 
-vec3 random_in_unit_sphere() {
+vec3 random_in_unit_disk() {
     while(true) {
-        vec3 _r = random_vector();
-        if(_r.len() < 1)
+        auto _r = vec3(random_double(-1,1), random_double(-1,1), 0);
+        if(dot(_r,_r) < 1)
             return _r;
     }
 }
 
-inline vec3 random_unit_vector() {
-    auto _r = random_in_unit_sphere();
-    return _r / _r.len();
+vec3 random_in_unit_sphere() {
+    while(true) {
+        vec3 _r = random_vector(-1,1);
+        if(dot(_r,_r) < 1)
+            return _r;
+    }
+}
+
+inline vec3 random_unit_vector() { 
+    return unit_vector(random_in_unit_sphere());
 }
 
 inline vec3 random_on_hemisphere(const vec3& normal) {
@@ -128,14 +135,6 @@ vec3 refract(const vec3& R, const vec3& n, double coeff) {
     auto R_perp = coeff * (R + cos_theta * n);
     auto R_paral = -sqrt(fabs(1.0 - dot(R_perp, R_perp))) * n;
     return R_perp + R_paral;
-}
-
-vec3 random_in_unit_disk() {
-    while(true) {
-        auto _r = vec3(random_double(-1,1), random_double(-1,1), 0);
-        if(dot(_r,_r) < 1)
-            return _r;
-    }
 }
 
 #endif

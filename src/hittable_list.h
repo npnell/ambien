@@ -25,12 +25,12 @@ public:
         double closest_t = t_max;
         bool hit_anything = false;
 
-        for(auto object : object_list) {
+        for(const auto& object : object_list) {
             if(object->
                 hit(r, t_min, closest_t, temp_rec)) {
+                hit_anything = true;
                 closest_t = temp_rec.t;
                 rec = temp_rec;
-                hit_anything = true;
             }
         }
 
