@@ -31,6 +31,8 @@ public:
     double defocus_angle = 0.0;
     double focus_dist = 10;
 
+    color background;
+
     // render
     void render(const hittable_list& world) {
         initialize();
@@ -115,16 +117,19 @@ private:
             return color(0,0,0);
         }
 
-        if(world.hit(r, 0.001, infinity, rec)) {
-            ray scattered;
-            color attenuation;
+        if(!world.hit(r, 0.001, infinity, rec))
+            return background;
 
-            if(rec.mat->scatter(r, rec, attenuation, scattered))
-                return attenuation * ray_color(scattered, depth - 1, world);
-            return color(0,0,0);
-        }
+        ray scattered;
+        color attenuation;
+        color emission_color = rec.mat->emitted(rec.u, rec.v, rec.p);
 
-        return color(0.70, 0.80, 1.00);
+        if(!rec.mat->scatter(r, rec, attenuation, scattered))
+            return emission_color;
+        
+        color scatter_color = attenuation * ray_color(scattered, depth - 1, world);
+
+        return emission_color + scatter_color;
     }
 
     ray get_ray(int i, int j) const {

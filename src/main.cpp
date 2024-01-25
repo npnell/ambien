@@ -10,7 +10,7 @@
 #include "bvh.h"
 #include "quad.h"
 
-void spheres_scene()
+void spheres()
 {
     // World
     hittable_list scene;
@@ -47,49 +47,53 @@ void spheres_scene()
     cam.defocus_angle = 0.0;
     cam.focus_dist = 3.4;
 
+    cam.background = color(0.70, 0.80, 1.00);
+
     cam.render(scene);
 }
 
-void quads_scene()
+void cornell_box()
 {
-    hittable_list scene;
+    hittable_list world;
 
-    // Materials
-    auto left_red     = std::make_shared<lambertian>(color(1.0, 0.2, 0.2));
-    auto back_green   = std::make_shared<lambertian>(color(0.2, 1.0, 0.2));
-    auto right_blue   = std::make_shared<lambertian>(color(0.2, 0.2, 1.0));
-    auto upper_orange = std::make_shared<lambertian>(color(1.0, 0.5, 0.0));
-    auto lower_teal   = std::make_shared<lambertian>(color(0.2, 0.8, 0.8));
+    auto red   = std::make_shared<lambertian>(color(.65, .05, .05));
+    auto white = std::make_shared<lambertian>(color(.73, .73, .73));
+    auto green = std::make_shared<lambertian>(color(.12, .45, .15));
+    auto light = std::make_shared<diffuse_light>(color(15, 15, 15));
 
-    // Quads
-    scene.add(std::make_shared<quad>(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red));
-    scene.add(std::make_shared<quad>(point3(-2,-2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green));
-    scene.add(std::make_shared<quad>(point3( 3,-2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue));
-    scene.add(std::make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
-    scene.add(std::make_shared<quad>(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal));
+    world.add(std::make_shared<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
+    world.add(std::make_shared<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
+    world.add(std::make_shared<quad>(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light));
+    world.add(std::make_shared<quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
+    world.add(std::make_shared<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
+    world.add(std::make_shared<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
 
     camera cam;
 
     cam.aspect_ratio = 1.0;
-    cam.image_width = 400;
-    cam.samples = 10;
+    cam.image_width = 600;
+    cam.samples = 20;
     cam.max_depth = 50;
+    cam.background = color(0,0,0);
 
-    cam.vfov = 80;
-    cam.look_from = point3(0,0,9);
-    cam.look_at = point3(0,0,0);
+    cam.vfov = 40;
+    cam.look_from = point3(278, 278, -800);
+    cam.look_at = point3(278, 278, 0);
     cam.vup = vec3(0,1,0);
 
     cam.defocus_angle = 0;
 
-    cam.render(scene);
+    cam.render(world);
 }
 
 int main(int argc, char* argv[])
 {
-    int c = std::stoi(argv[1]);
+    int c = 2;
+    if(argc > 1)
+        c = std::stoi(argv[1]);
+    
     switch(c) {
-        case 1: spheres_scene(); break;
-        case 2: quads_scene();   break;
+        case 1: spheres(); break;
+        case 2: cornell_box();   break;
     }
 }
