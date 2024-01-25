@@ -23,7 +23,7 @@ void spheres()
     auto checker_material = std::make_shared<lambertian>(checker_texture);
 
     // RHS, X is horizontal, Y is vertical and Z goes through the screen
-    scene.add(std::make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, checker_material));
+    scene.add(std::make_shared<quad>(point3(-100.0, -0.5, 100.0), vec3(200.0, 0.0, 0.0), vec3(0.0, 0.0, -200.0), checker_material));
     scene.add(std::make_shared<sphere>(point3( 0.0, 0.0, -1.0), 0.5, earth_material));
     scene.add(std::make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
     scene.add(std::make_shared<sphere>(point3(-1.0, 0.0, -1.0), -0.4, material_left));
@@ -68,11 +68,21 @@ void cornell_box()
     world.add(std::make_shared<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
     world.add(std::make_shared<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
 
+    std::shared_ptr<hittable> box1 = box(point3(0,0,0), point3(165,330,165), white);
+    box1 = std::make_shared<rotate_y>(box1, 15);
+    box1 = std::make_shared<translate>(box1, vec3(265,0,295));
+    world.add(box1);
+
+    std::shared_ptr<hittable> box2 = box(point3(0,0,0), point3(165,165,165), white);
+    box2 = std::make_shared<rotate_y>(box2, -18);
+    box2 = std::make_shared<translate>(box2, vec3(130,0,65));
+    world.add(box2);
+    
     camera cam;
 
     cam.aspect_ratio = 1.0;
-    cam.image_width = 600;
-    cam.samples = 20;
+    cam.image_width = 400;
+    cam.samples = 50;
     cam.max_depth = 50;
     cam.background = color(0,0,0);
 

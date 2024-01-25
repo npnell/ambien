@@ -7,6 +7,8 @@
 
 class aabb {
 public:
+    interval x, y, z;
+    
     aabb() = default;
     aabb(const interval& _x, const interval& _y, const interval& _z)
         : x(_x), y(_y), z(_z) {}
@@ -77,8 +79,14 @@ public:
         }
         return true;
     }
-private:
-    interval x, y, z;
 };
+
+aabb operator+(const aabb& bbox, const vec3& offset) {
+        return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
+    }
+
+aabb operator+(const vec3& offset, const aabb& bbox) {
+    return bbox + offset;
+}
 
 #endif

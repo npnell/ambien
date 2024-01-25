@@ -70,4 +70,25 @@ private:
     vec3 w;
 };
 
+std::shared_ptr<hittable_list> box(const point3& a, const point3& b, std::shared_ptr<material> mat)
+{
+    auto box = std::make_shared<hittable_list>();
+
+    auto min = point3(fmin(a[0], b[0]), fmin(a[1], b[1]), fmin(a[2], b[2]));
+    auto max = point3(fmax(a[0], b[0]), fmax(a[1], b[1]), fmax(a[2], b[2]));
+
+    auto dx = vec3(max[0] - min[0], 0, 0);
+    auto dy = vec3(0, max[1] - min[1], 0);
+    auto dz = vec3(0, 0, max[2] - min[2]);
+
+    box->add(std::make_shared<quad>(point3(min[0], min[1], max[2]),  dx,  dy, mat)); // front
+    box->add(std::make_shared<quad>(point3(max[0], min[1], max[2]), -dz,  dy, mat)); // right
+    box->add(std::make_shared<quad>(point3(max[0], min[1], min[2]), -dx,  dy, mat)); // back
+    box->add(std::make_shared<quad>(point3(min[0], min[1], min[2]),  dz,  dy, mat)); // left
+    box->add(std::make_shared<quad>(point3(min[0], max[1], max[2]),  dx, -dz, mat)); // top
+    box->add(std::make_shared<quad>(point3(max[0], min[1], min[2]),  dx,  dz, mat)); // bottom
+
+    return box;
+}
+
 #endif
