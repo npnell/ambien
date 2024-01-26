@@ -31,6 +31,9 @@ public:
     double defocus_angle = 0.0;
     double focus_dist = 10;
 
+    int sqrt_spp;
+    double recip_sqrt_spp;
+
     color background;
 
     // render
@@ -44,9 +47,11 @@ public:
             for(int i = 0; i < image_width; ++i) {
                 color pixel_color = color(0,0,0);
 
-                for(int s = 0; s < samples; ++s) {
-                    ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, max_depth, world);
+                for(int s_j = 0; s_j < sqrt_spp; ++s_j) {
+                    for(int s_i = 0; s_i < sqrt_spp; ++s_i) {
+                        ray r = get_ray(i, j, s_i, s_j);
+                        pixel_color += ray_color(r, max_depth, world);
+                    }
                 }
 
                 write_color(data, pixel_color, image_width, channels, i, j, samples);
@@ -78,6 +83,9 @@ private:
     vec3 defocus_disk_v;
 
     void initialize() {
+        sqrt_spp = static_cast<int>(sqrt(samples));
+        recip_sqrt_spp = 1.0 / sqrt_spp;
+
         image_height = static_cast<int>(image_width / aspect_ratio);
         image_height = image_height > 1 ? image_height : 1;
 
@@ -132,18 +140,18 @@ private:
         return emission_color + scatter_color;
     }
 
-    ray get_ray(int i, int j) const {
+    ray get_ray(int i, int j, int s_i, int s_j) const {
         auto pixel_center = pixelloc_00 + pixel_delta_u * i + pixel_delta_v * j;
-        auto pixel_sample = pixel_center + pixel_sample_square();
+        auto pixel_sample = pixel_center + pixel_sample_square(s_i, s_j);
 
         auto ray_origin = defocus_angle <= 0 ? camera_center : defocus_disk_sample();
         auto ray_direction = pixel_sample - ray_origin ;
         return ray(ray_direction, ray_origin);
     }
 
-    vec3 pixel_sample_square() const {
-        auto px = -0.5 + random_double();
-        auto py = -0.5 + random_double();
+    vec3 pixel_sample_square(int s_i, int s_j) const {
+        auto px = -0.5 + recip_sqrt_spp * (s_i * random_double());
+        auto py = -0.5 + recip_sqrt_spp * (s_j * random_double());
 
         return (px * pixel_delta_u) + (py * pixel_delta_v);
     }
